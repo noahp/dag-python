@@ -1,5 +1,6 @@
-all: buildir buildir/a buildir/b buildir/c
+# Makefile example of the same functionality
 
+all: buildir buildir/a buildir/b buildir/c
 
 buildir:
 	sleep 1
