@@ -1,4 +1,4 @@
-# dag-python (Directed Acyclic Graph) build testing
+# ➿ dag-python (Directed Acyclic Graph) build testing
 
 Using some python 3.9 features to run subprocesses as a build system would, with
 dependencies sequenced correctly and parallelized.
