@@ -32,7 +32,7 @@ def execute_build(tasks, graph):
             console.log("Starting task:", node)
             p = mp.Process(
                 target=run_task_in_process,
-                args=(tasks[node], node, finalized_tasks_queue),
+                args=(tasks[node]["command"], node, finalized_tasks_queue),
             )
             p.start()
             # save it as running
@@ -51,19 +51,32 @@ def execute_build(tasks, graph):
 
 
 if __name__ == "__main__":
-    # these are the tasks
-    tasks = {
-        "buildir": ["sleep 1 && mkdir -p buildir"],
-        "buildir/a": ["sleep 1 && echo 'a' > buildir/a"],
-        "buildir/b": ["sleep 1 && echo 'b' > buildir/b"],
-        "buildir/c": ["sleep 1 && cat buildir/a buildir/b > buildir/c"],
-    }
+    import json
+    import sys
+
+    if not sys.stdin.isatty():
+        tasks = json.load(sys.stdin)
+    else:
+        # example tasks + dependencies
+        print("Loading example tasks")
+        tasks = {
+            "buildir": {"command": ["sleep 1 && mkdir -p buildir"], "dependencies": []},
+            "buildir/a": {
+                "command": ["sleep 1 && echo a > buildir/a"],
+                "dependencies": ["buildir"],
+            },
+            "buildir/b": {
+                "command": ["sleep 1 && echo b > buildir/b"],
+                "dependencies": ["buildir"],
+            },
+            "buildir/c": {
+                "command": ["sleep 1 && cat buildir/a buildir/b > buildir/c"],
+                "dependencies": ["buildir/a", "buildir/b"],
+            },
+        }
     # build the graph of dependencies
-    graph = {
-        "buildir": {},
-        "buildir/a": {"buildir"},
-        "buildir/b": {"buildir"},
-        "buildir/c": {"buildir/a", "buildir/b"},
-    }
+    graph = dict()
+    for task in tasks:
+        graph[task] = tasks[task]["dependencies"]
 
     execute_build(tasks, graph)
